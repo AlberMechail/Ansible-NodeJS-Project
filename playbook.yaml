@@ -1,0 +1,100 @@
+---
+- name: NodeJS App Deployment
+  hosts: all
+  remote_user: root
+  become: true
+  vars:
+    node_apps_location: /var/www/nodejs-app
+    node_app_port: 3000
+    node_user: nodeuser
+  tasks:
+    - name: Install Node.js
+      yum:
+        name: "{{item}}"
+        state: present
+      loop: 
+        - nodejs
+        - npm
+
+    - name: Create Node.js user
+      user:
+        name: "{{ node_user }}"
+        shell: /sbin/nologin
+        system: yes
+        create_home: no
+
+    - name: Ensure Node.js app directory exists
+      file:
+        path: "{{ node_apps_location }}"
+        state: directory
+        owner: "{{node_user}}"
+        group: "{{node_user}}"
+        mode: '0755'
+    
+    - name: Copy Node.js app files
+      copy:
+        src: /home/albermechail/ansible-project/Ansible-NodeJS-Project/app
+        dest: "{{ node_apps_location }}"
+        owner: "{{node_user}}"
+        group: "{{node_user}}"
+        mode: '0755'
+    
+    - name: Install app dependencies
+      npm:
+        path: "{{ node_apps_location }}"
+        state: present
+
+    - name: Create systemd service file for Node.js app
+      copy:
+        dest: /etc/systemd/system/nodejs-app.service
+        content: |
+          [Unit]
+          Description=Node.js App
+          After=network.target
+
+          [Service]
+          ExecStart=/usr/bin/node {{ node_apps_location }}/app.js
+          WorkingDirectory={{node_apps_location}}
+          Restart=always
+          User="{{ node_user }}"
+          Group="{{ node_user }}"
+          Environment=PATH=/usr/bin:/usr/local/bin
+          Environment=NODE_ENV=production
+          Environment=PORT="{{ node_app_port }}"
+
+          [Install]
+          WantedBy=multi-user.target
+      notify: Reload systemd
+
+    - name: Reload systemd
+      systemd:
+        daemon_reload: yes
+      notify: Restart Node.js app
+
+    - name: Start and enable Node.js app service
+      systemd:
+        name: nodejs-app
+        state: started
+        enabled: yes
+
+    - name: Ensure Firewalld is running
+      service:
+        name: firewalld
+        state: started
+        enabled: yes
+    
+    - name: Open Node.js app port in firewall
+      firewalld:
+        port: "{{ node_app_port }}/tcp"
+        permanent: yes
+        state: enabled
+        immediate: yes
+
+  handlers:
+    - name: Restart Node.js app
+      systemd:
+        name: nodejs-app
+        state: restarted
+        enabled: yes
+
+    

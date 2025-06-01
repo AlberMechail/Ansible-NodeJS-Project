@@ -41,7 +41,7 @@
     
     - name: Install app dependencies
       npm:
-        path: "{{ node_apps_location }}"
+        path: "{{ node_apps_location }}/app"
         state: present
 
     - name: Create systemd service file for Node.js app
@@ -91,6 +91,9 @@
         immediate: yes
 
   handlers:
+    - name: Reload systemd
+      systemd:
+        daemon_reload: yes
     - name: Restart Node.js app
       systemd:
         name: nodejs-app

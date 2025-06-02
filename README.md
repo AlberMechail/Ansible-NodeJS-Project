@@ -26,16 +26,6 @@ EPEL repository enabled on the target server (for npm installation)
 📦 Application Details
 The sample Node.js application is a simple Express server defined in app.js with the following package.json:
 
-{
-  "name": "examplenodeapp",
-  "description": "Example Express Node.js app.",
-  "author": "Jeff Geerling <geerlingguy@mac.com>",
-  "dependencies": {
-    "express": "4.x"
-  },
-  "engine": "node >= 0.10.6"
-}
-
 ⚙️ Usage
 Clone the Repository
 

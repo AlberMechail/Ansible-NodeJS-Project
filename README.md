@@ -4,6 +4,7 @@ Ansible-NodeJS-Project
 This project automates the deployment of a Node.js application using Ansible. It sets up the necessary environment, installs dependencies, configures system services, and ensures the application is running and accessible.
 
 📁 Project Structure
+![image](https://github.com/user-attachments/assets/4f6a4374-fdda-4e28-a9f6-0c90c971d4b0)
 
 Ansible-NodeJS-Project/
 ├── app/                  # Node.js application source code
